@@ -147,5 +147,20 @@ match_reader <- function(match, team2, score){
     }
   }
   
-  return(last_goal_team)
+  ## Determine how many subs each team used in regulation
+  
+  ## Isolate text with substitutes for both teams
+  substitutes_headers <- str_locate_all(match, pattern = "\n\nSubstitutes\n\n")
+  team1_subs_text_start_n <- substitutes_headers[[1]][1,2] - 1
+  team1_subs_text_end_n <- substitutes_headers[[1]][2,1]
+  team1_subs_text <- substr(match, team1_subs_text_start_n, team1_subs_text_end_n)
+  team1_subs_text_nns <- str_locate_all(team1_subs_text, pattern = "\n\n")
+  team1_subs_available <- nrow(team1_subs_text_nns[[1]]) - 11
+  team1_subs_text <- substr(team1_subs_text, 1, team1_subs_text_nns[[1]][(team1_subs_available + 1), 1])
+  
+  team2_subs_text_start_n <- substitutes_headers[[1]][2,2] - 1
+  team2_subs_text_end_n <- str_length(match)
+  team2_subs_text <- substr(match, team2_subs_text_start_n, team2_subs_text_end_n)
+  
+  return(team2_subs_text)
 }
