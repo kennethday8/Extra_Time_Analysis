@@ -152,15 +152,26 @@ match_reader <- function(match, team2, score){
   ## Isolate text with substitutes for both teams
   substitutes_headers <- str_locate_all(match, pattern = "\n\nSubstitutes\n\n")
   team1_subs_text_start_n <- substitutes_headers[[1]][1,2] - 1
-  team1_subs_text_end_n <- substitutes_headers[[1]][2,1]
+  team1_subs_text_end_n <- substitutes_headers[[1]][2,1] + 1
   team1_subs_text <- substr(match, team1_subs_text_start_n, team1_subs_text_end_n)
   team1_subs_text_nns <- str_locate_all(team1_subs_text, pattern = "\n\n")
-  team1_subs_available <- nrow(team1_subs_text_nns[[1]]) - 11
-  team1_subs_text <- substr(team1_subs_text, 1, team1_subs_text_nns[[1]][(team1_subs_available + 1), 1])
+  team1_subs_available <- nrow(team1_subs_text_nns[[1]]) - 12
+  team1_subs_text <- substr(team1_subs_text, 1, team1_subs_text_nns[[1]][(team1_subs_available + 1), 1] + 1)
   
   team2_subs_text_start_n <- substitutes_headers[[1]][2,2] - 1
   team2_subs_text_end_n <- str_length(match)
   team2_subs_text <- substr(match, team2_subs_text_start_n, team2_subs_text_end_n)
+  team2_subs_text_nns <- str_locate_all(team2_subs_text, pattern = "\n\n")
+  team2_subs_available <- nrow(team2_subs_text_nns[[1]])
   
-  return(team2_subs_text)
+  ## Count how many subs each team used in regulation
+  team1_subs_count <- 0
+  for (i in 1:team1_subs_available){
+    sub_i_start_n <- team1_subs_text_nns[[1]][i,2] + 1
+    sub_i_end_n <- team1_subs_text_nns[[1]][(i + 1), 2]
+    sub_i <- substr(team1_subs_text, sub_i_start_n, sub_i_end_n)
+    sub_i_min_check <- str_locate_all(sub_i, pattern = "\t[0-9]{1,3}'\n\n")
+  }
+  
+  return(team1_subs_text)
 }
