@@ -166,6 +166,8 @@ match_reader <- function(match, team2, score){
   
   ## Count how many subs each team used in regulation
   team1_subs_count <- 0
+  ## Count how many sub minutes were played in regulation
+  team1_subs_total_min <- 0
   for (i in 1:team1_subs_available){
     sub_i_start_n <- team1_subs_text_nns[[1]][i,2] + 1
     sub_i_end_n <- team1_subs_text_nns[[1]][(i + 1), 2]
@@ -179,11 +181,15 @@ match_reader <- function(match, team2, score){
       ### Case 1: Sub made appearance in regulation
       if (sub_i_min <= 90){
         team1_subs_count <- team1_subs_count + 1
+        team1_subs_total_min <- team1_subs_total_min + (90 - sub_i_min)
       }
     }
   }
   
+  ## Count how many subs each team used in regulation
   team2_subs_count <- 0
+  ## Count how many sub minutes were played in regulation
+  team2_subs_total_min <- 0
   for (i in 1:team2_subs_available){
     sub_i_start_n <- team2_subs_text_nns[[1]][i,2] + 1
     sub_i_end_n <- team2_subs_text_nns[[1]][(i + 1), 2]
@@ -197,9 +203,10 @@ match_reader <- function(match, team2, score){
       ### Case 1: Sub made appearance in regulation
       if (sub_i_min <= 90){
         team2_subs_count <- team2_subs_count + 1
+        team2_subs_total_min <- team2_subs_total_min + (90 - sub_i_min)
       }
     }
   }
   
-  return(c(team1_subs_count, team2_subs_count))
+  return(c(team1_subs_total_min, team2_subs_total_min))
 }
