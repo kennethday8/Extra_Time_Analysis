@@ -160,9 +160,9 @@ match_reader <- function(match, team2, score){
   
   team2_subs_text_start_n <- substitutes_headers[[1]][2,2] - 1
   team2_subs_text_end_n <- str_length(match)
-  team2_subs_text <- substr(match, team2_subs_text_start_n, team2_subs_text_end_n)
+  team2_subs_text <- paste(substr(match, team2_subs_text_start_n, team2_subs_text_end_n), "\n\n", sep = "")
   team2_subs_text_nns <- str_locate_all(team2_subs_text, pattern = "\n\n")
-  team2_subs_available <- nrow(team2_subs_text_nns[[1]])
+  team2_subs_available <- nrow(team2_subs_text_nns[[1]]) - 1
   
   ## Count how many subs each team used in regulation
   team1_subs_count <- 0
@@ -171,7 +171,35 @@ match_reader <- function(match, team2, score){
     sub_i_end_n <- team1_subs_text_nns[[1]][(i + 1), 2]
     sub_i <- substr(team1_subs_text, sub_i_start_n, sub_i_end_n)
     sub_i_min_check <- str_locate_all(sub_i, pattern = "\t[0-9]{1,3}'\n\n")
+    ### Case 1: Sub made appearance
+    if (nrow(sub_i_min_check[[1]]) > 0){
+      sub_i_min_start_n <- sub_i_min_check[[1]][1,1] + 1
+      sub_i_min_end_n <- sub_i_min_check[[1]][1,2] - 3
+      sub_i_min <- as.integer(substr(sub_i, sub_i_min_start_n, sub_i_min_end_n))
+      ### Case 1: Sub made appearance in regulation
+      if (sub_i_min <= 90){
+        team1_subs_count <- team1_subs_count + 1
+      }
+    }
   }
   
-  return(team1_subs_text)
+  team2_subs_count <- 0
+  for (i in 1:team2_subs_available){
+    sub_i_start_n <- team2_subs_text_nns[[1]][i,2] + 1
+    sub_i_end_n <- team2_subs_text_nns[[1]][(i + 1), 2]
+    sub_i <- substr(team2_subs_text, sub_i_start_n, sub_i_end_n)
+    sub_i_min_check <- str_locate_all(sub_i, pattern = "\t[0-9]{1,3}'\n\n")
+    ### Case 1: Sub made appearance
+    if (nrow(sub_i_min_check[[1]]) > 0){
+      sub_i_min_start_n <- sub_i_min_check[[1]][1,1] + 1
+      sub_i_min_end_n <- sub_i_min_check[[1]][1,2] - 3
+      sub_i_min <- as.integer(substr(sub_i, sub_i_min_start_n, sub_i_min_end_n))
+      ### Case 1: Sub made appearance in regulation
+      if (sub_i_min <= 90){
+        team2_subs_count <- team2_subs_count + 1
+      }
+    }
+  }
+  
+  return(c(team1_subs_count, team2_subs_count))
 }
