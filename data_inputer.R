@@ -52,7 +52,7 @@ data_inputer <- function(file_name){
     }
   }
   
-  ## Insert column that shows which team won
+  ## Insert column that shows which team won; change score column to just show final score
   matches$winner <- 0
   for (i in 1:matches_count){
     score_i <- matches[i,4]
@@ -72,6 +72,8 @@ data_inputer <- function(file_name){
     else if (score2 > score1){
       matches[i,11] <- 2
     }
+    
+    matches[i,4] <- paste(score1, ":", score2, sep ="")
   }
   
   return(matches)
