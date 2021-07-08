@@ -85,6 +85,7 @@ match_reader <- function(match, team2, score){
     goal_count_n <- team1_goals + team2_goals
     
     ## Isolate text with goals
+    last_goal_team <- 0
     
     if (goal_count_n == 0){
       last_goal_team <- 0
@@ -106,44 +107,47 @@ match_reader <- function(match, team2, score){
           last_goal_number <- i
         }
       }
-      ## Determine which team scored last in regulation
-      goal_score_starts <- str_locate_all(goal_list, pattern = "[0-9]{1,2} : ")
-      goal_score_seps <- str_locate_all(goal_list, pattern = " : ")
-      goal_score_ends <- str_locate_all(goal_list, pattern = " [0-9]{1,2}\t")
       
-      ## Determine both teams score after second to last (stl) goal
-      ### Case 1: Last goal is first goal (ie. match finishes 0:1 or 1:0)
-      if (goal_count_n == 1){
-        team1_score_stl <- 0
-        team2_score_stl <- 0
-      }
-      ### Case 2: Last goal is not first goal (ie. match does not finish 0:1 or 1:0)
-      else {
-        team1_score_stl_start_n <- goal_score_starts[[1]][(last_goal_number - 1), 1]
-        team1_score_stl_end_n <- goal_score_seps[[1]][(last_goal_number - 1), 1] - 1
-        team1_score_stl <- as.integer(substr(goal_list, team1_score_stl_start_n, team1_score_stl_end_n))
+      if (last_goal_number > 0){
+        ## Determine which team scored last in regulation
+        goal_score_starts <- str_locate_all(goal_list, pattern = "[0-9]{1,2} : ")
+        goal_score_seps <- str_locate_all(goal_list, pattern = " : ")
+        goal_score_ends <- str_locate_all(goal_list, pattern = " [0-9]{1,2}\t")
         
-        team2_score_stl_start_n <- goal_score_seps[[1]][(last_goal_number - 1), 2] + 1
-        team2_score_stl_end_n <- goal_score_ends[[1]][(last_goal_number - 1), 1] + 1
-        team2_score_stl <- as.integer(substr(goal_list, team2_score_stl_start_n, team2_score_stl_end_n))
-      }
-      ## Determine both teams score after last goal
-      team1_score_last_start_n <- goal_score_starts[[1]][last_goal_number, 1]
-      team1_score_last_end_n <- goal_score_seps[[1]][last_goal_number, 1] - 1
-      team1_score_last <- as.integer(substr(goal_list, team1_score_last_start_n, team1_score_last_end_n))
-      
-      team2_score_last_start_n <- goal_score_seps[[1]][last_goal_number, 2] + 1
-      team2_score_last_end_n <- goal_score_ends[[1]][last_goal_number, 1] + 1
-      team2_score_last <- as.integer(substr(goal_list, team2_score_last_start_n, team2_score_last_end_n))
-      
-      ## Assign which team scored last
-      ### Case 1: team 1's score did not change (ie. team 2 scored)
-      if (team1_score_stl == team1_score_last){
-        last_goal_team <- 2
-      }
-      ### Case 2: team 1's score did change (ie. team 1 scored)
-      else {
-        last_goal_team <- 1
+        ## Determine both teams score after second to last (stl) goal
+        ### Case 1: Last goal is first goal (ie. match finishes 0:1 or 1:0)
+        if (goal_count_n == 1){
+          team1_score_stl <- 0
+          team2_score_stl <- 0
+        }
+        ### Case 2: Last goal is not first goal (ie. match does not finish 0:1 or 1:0)
+        else {
+          team1_score_stl_start_n <- goal_score_starts[[1]][(last_goal_number - 1), 1]
+          team1_score_stl_end_n <- goal_score_seps[[1]][(last_goal_number - 1), 1] - 1
+          team1_score_stl <- as.integer(substr(goal_list, team1_score_stl_start_n, team1_score_stl_end_n))
+          
+          team2_score_stl_start_n <- goal_score_seps[[1]][(last_goal_number - 1), 2] + 1
+          team2_score_stl_end_n <- goal_score_ends[[1]][(last_goal_number - 1), 1] + 1
+          team2_score_stl <- as.integer(substr(goal_list, team2_score_stl_start_n, team2_score_stl_end_n))
+        }
+        ## Determine both teams score after last goal
+        team1_score_last_start_n <- goal_score_starts[[1]][last_goal_number, 1]
+        team1_score_last_end_n <- goal_score_seps[[1]][last_goal_number, 1] - 1
+        team1_score_last <- as.integer(substr(goal_list, team1_score_last_start_n, team1_score_last_end_n))
+        
+        team2_score_last_start_n <- goal_score_seps[[1]][last_goal_number, 2] + 1
+        team2_score_last_end_n <- goal_score_ends[[1]][last_goal_number, 1] + 1
+        team2_score_last <- as.integer(substr(goal_list, team2_score_last_start_n, team2_score_last_end_n))
+        
+        ## Assign which team scored last
+        ### Case 1: team 1's score did not change (ie. team 2 scored)
+        if (team1_score_stl == team1_score_last){
+          last_goal_team <- 2
+        }
+        ### Case 2: team 1's score did change (ie. team 1 scored)
+        else {
+          last_goal_team <- 1
+        }
       }
     }
   }
