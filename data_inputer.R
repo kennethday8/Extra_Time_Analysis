@@ -18,5 +18,16 @@ data_inputer <- function(file_name){
   ## Fix dates so they have the same format
   matches$Date <- as.Date(matches$Date, "%d/%m/%Y")
   
+  ## Insert colum that shows whether match is group stage or knockout
+  matches$Knockout <- 0
+  for (i in 1:matches_count){
+    group_check <- str_locate_all(matches[i,5], pattern = "Group")
+    if (nrow(group_check[[1]]) == 0){
+      matches[i,7] <- "KO"
+    } else {
+      matches[i,7] <- "GS"
+    }
+  }
+  
   return(matches)
 }
