@@ -85,17 +85,18 @@ match_reader <- function(match, team2, score){
     goal_count_n <- team1_goals + team2_goals
     
     ## Isolate text with goals
-    goal_list_start_n <- 1
-    goal_list_end <- str_locate_all(match, pattern = "\n\n")
-    goal_list_end_n <- goal_list_end[[1]][goal_count_n, 1]
-    goal_list <- substr(match, goal_list_start_n, goal_list_end_n)
     
-    goal_count <- str_locate_all(goal_list, pattern = " [0-9]{1,3}\\. / ")
-    goal_minute_ends <- str_locate_all(goal_list, pattern = "[0-9]\\. / ")
-    goal_count_n <- nrow(goal_count[[1]])
     if (goal_count_n == 0){
       last_goal_team <- 0
     } else {
+      goal_list_start_n <- 1
+      goal_list_end <- str_locate_all(match, pattern = "\n\n")
+      goal_list_end_n <- goal_list_end[[1]][goal_count_n, 1]
+      goal_list <- substr(match, goal_list_start_n, goal_list_end_n)
+      
+      goal_count <- str_locate_all(goal_list, pattern = " [0-9]{1,3}\\. / ")
+      goal_minute_ends <- str_locate_all(goal_list, pattern = "[0-9]\\. / ")
+      goal_count_n <- nrow(goal_count[[1]])
       last_goal_number <- 0
       for (i in 1:goal_count_n){
         goal_i_min_start_n <- goal_count[[1]][i,1] + 1
