@@ -76,5 +76,8 @@ data_inputer <- function(file_name){
     matches[i,4] <- paste(score1, ":", score2, sep ="")
   }
   
+  ## Change comp column to include year as well
+  matches$Comp <- paste(matches$Comp, year(matches$Date), sep = " ")
+  
   return(matches)
 }
