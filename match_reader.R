@@ -208,5 +208,5 @@ match_reader <- function(match, team2, score){
     }
   }
   
-  return(c(team1_subs_total_min, team2_subs_total_min))
+  return(c(last_goal_team, team1_subs_count, team2_subs_count, team1_subs_total_min, team2_subs_total_min))
 }
