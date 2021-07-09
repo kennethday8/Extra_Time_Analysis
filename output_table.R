@@ -57,8 +57,8 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   ## Insert column that shows number of days since last match for team 1
   ot$Team1_last_match <- NA
   for (i in 2:match_count){
-    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,3])[,4]
-    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,3])[,4]
+    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,3] & Comp == ot[i,7])[,4]
+    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,3] & Comp == ot[i,7])[,4]
     matches_i <- c(matches_i_t1, matches_i_t2)
     ## Case 1: not team's first match of the competition
     if (length(matches_i) != 0){
@@ -70,8 +70,8 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   ## Insert column that shows number of days since last match for team 2
   ot$Team2_last_match <- NA
   for (i in 2:match_count){
-    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,1])[,4]
-    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,1])[,4]
+    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,1] & Comp == ot[i,7])[,4]
+    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,1] & Comp == ot[i,7])[,4]
     matches_i <- c(matches_i_t1, matches_i_t2)
     ## Case 1: not team's first match of the competition
     if (length(matches_i) != 0){
