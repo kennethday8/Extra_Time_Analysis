@@ -162,6 +162,10 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   }
   ot$Team2_last_date <- as_date(ot$Team2_last_date)
   
+  ## Clean up table by removing unnecessary columns
+  columns_remove <- c(1,2,3,9,10)
+  ot <- ot[,-columns_remove]
+  
   time_end <- Sys.time()
   print((time_end - time_start))
   return(ot)
