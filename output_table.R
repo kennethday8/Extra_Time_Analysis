@@ -43,12 +43,42 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   ot <- ot[, c(4,3,2,1,5:19)]
   
   ## Add in ranking and normalized points for Team1; rename columns
-  ot <- merge(ot, rankings, by.x = c("Team1_ID", "FIFA.Rankings"), by.y = c("id", "rank_date"))[,c(1:20,26)]
+  ot <- merge(ot, rankings, by.x = c("Team1_ID", "FIFA.Rankings"), by.y = c("id", "rank_date"), all.x = TRUE)[,c(1:20,26)]
   colnames(ot)[20:21] <- c("Team1_rank", "Team1_pts_norm")
   
   ## Add in ranking and normalized points for Team2; rename columns
-  ot <- merge(ot, rankings, by.x = c("Team2_ID", "FIFA.Rankings"), by.y = c("id", "rank_date"))[,c(1:22,28)]
+  ot <- merge(ot, rankings, by.x = c("Team2_ID", "FIFA.Rankings"), by.y = c("id", "rank_date"), all.x = TRUE)[,c(1:22,28)]
   colnames(ot)[22:23] <- c("Team2_rank", "Team2_pts_norm")
+  
+  ## Reorder by match date and reset row index
+  ot <- ot[order(ot$Date),]
+  rownames(ot) <- NULL
+  
+  ## Insert column that shows number of days since last match for team 1
+  ot$Team1_last_match <- NA
+  for (i in 2:match_count){
+    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,3])[,4]
+    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,3])[,4]
+    matches_i <- c(matches_i_t1, matches_i_t2)
+    ## Case 1: not team's first match of the competition
+    if (length(matches_i) != 0){
+      ot[i,24] <- sort(matches_i)[length(matches_i)]
+    }
+  }
+  ot$Team1_last_match <- as_date(ot$Team1_last_match)
+  
+  ## Insert column that shows number of days since last match for team 2
+  ot$Team2_last_match <- NA
+  for (i in 2:match_count){
+    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,1])[,4]
+    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,1])[,4]
+    matches_i <- c(matches_i_t1, matches_i_t2)
+    ## Case 1: not team's first match of the competition
+    if (length(matches_i) != 0){
+      ot[i,25] <- sort(matches_i)[length(matches_i)]
+    }
+  }
+  ot$Team2_last_match <- as_date(ot$Team2_last_match)
   
   time_end <- Sys.time()
   print((time_end - time_start))
