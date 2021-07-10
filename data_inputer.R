@@ -50,6 +50,19 @@ data_inputer <- function(file_name){
     } else {
       matches[i,10] <- "extra time"
     }
+    
+    ## Fix for Copa America matches where the is a pso but no extra time
+    et_years <- 2011
+    et_final_years <- c(2011, 2015, 2016)
+    
+    ## Case 1: non-final matches at Copa America played in years without extra time
+    if (matches[i,7] == "Copa America" & matches[i,5] != "Final" & year(matches[i,1]) != et_years){
+      matches[i,10] <- "regulation"
+    }
+    ## Case 2: final matches at Copa America played in years without extra time
+    else if (matches[i,7] == "Copa America" & matches[i,5] == "Final" & !is.element(year(matches[i,1]), et_final_years)){
+      matches[i,10] <- "regulation"
+    }
   }
   
   ## Insert column that shows which team won; change score column to just show final score
