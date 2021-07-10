@@ -19,8 +19,8 @@ match_reader <- function(match, team2, score){
     goal_list_end_n <- pso_check[[1]][1,1]
     goal_list <- substr(match, goal_list_start_n, goal_list_end_n)
     
-    goal_count <- str_locate_all(goal_list, pattern = " [0-9]{1,3}\\. / ")
-    goal_minute_ends <- str_locate_all(goal_list, pattern = "[0-9]\\. / ")
+    goal_count <- str_locate_all(goal_list, pattern = " [0-9]{1,3}\\.")
+    goal_minute_ends <- str_locate_all(goal_list, pattern = "[0-9]\\.")
     goal_count_n <- nrow(goal_count[[1]])
     if (goal_count_n == 0){
       last_goal_team <- 0
@@ -95,8 +95,8 @@ match_reader <- function(match, team2, score){
       goal_list_end_n <- goal_list_end[[1]][goal_count_n, 1]
       goal_list <- substr(match, goal_list_start_n, goal_list_end_n)
       
-      goal_count <- str_locate_all(goal_list, pattern = " [0-9]{1,3}\\. / ")
-      goal_minute_ends <- str_locate_all(goal_list, pattern = "[0-9]\\. / ")
+      goal_count <- str_locate_all(goal_list, pattern = " [0-9]{1,3}\\.")
+      goal_minute_ends <- str_locate_all(goal_list, pattern = "[0-9]\\.")
       goal_count_n <- nrow(goal_count[[1]])
       last_goal_number <- 0
       for (i in 1:goal_count_n){
