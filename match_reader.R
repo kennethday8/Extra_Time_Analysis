@@ -156,59 +156,148 @@ match_reader <- function(match, team2, score){
   
   ## Isolate text with substitutes for both teams
   substitutes_headers <- str_locate_all(match, pattern = "\n\nSubstitutes\n\n")
-  team1_subs_text_start_n <- substitutes_headers[[1]][1,2] - 1
-  team1_subs_text_end_n <- substitutes_headers[[1]][2,1] + 1
-  team1_subs_text <- substr(match, team1_subs_text_start_n, team1_subs_text_end_n)
-  team1_subs_text_nns <- str_locate_all(team1_subs_text, pattern = "\n\n")
-  team1_subs_available <- nrow(team1_subs_text_nns[[1]]) - 12
-  team1_subs_text <- substr(team1_subs_text, 1, team1_subs_text_nns[[1]][(team1_subs_available + 1), 1] + 1)
   
-  team2_subs_text_start_n <- substitutes_headers[[1]][2,2] - 1
-  team2_subs_text_end_n <- str_length(match)
-  team2_subs_text <- paste(substr(match, team2_subs_text_start_n, team2_subs_text_end_n), "\n\n", sep = "")
-  team2_subs_text_nns <- str_locate_all(team2_subs_text, pattern = "\n\n")
-  team2_subs_available <- nrow(team2_subs_text_nns[[1]]) - 1
+  ## Determine if both teams have substitutes
+  teams_both_subs <- nrow(substitutes_headers[[1]])
   
-  ## Count how many subs each team used in regulation
-  team1_subs_count <- 0
-  ## Count how many sub minutes were played in regulation
-  team1_subs_total_min <- 0
-  for (i in 1:team1_subs_available){
-    sub_i_start_n <- team1_subs_text_nns[[1]][i,2] + 1
-    sub_i_end_n <- team1_subs_text_nns[[1]][(i + 1), 2]
-    sub_i <- substr(team1_subs_text, sub_i_start_n, sub_i_end_n)
-    sub_i_min_check <- str_locate_all(sub_i, pattern = "\t[0-9]{1,3}'\n\n")
-    ### Case 1: Sub made appearance
-    if (nrow(sub_i_min_check[[1]]) > 0){
-      sub_i_min_start_n <- sub_i_min_check[[1]][1,1] + 1
-      sub_i_min_end_n <- sub_i_min_check[[1]][1,2] - 3
-      sub_i_min <- as.integer(substr(sub_i, sub_i_min_start_n, sub_i_min_end_n))
-      ### Case 1: Sub made appearance in regulation
-      if (sub_i_min <= 90){
-        team1_subs_count <- team1_subs_count + 1
-        team1_subs_total_min <- team1_subs_total_min + (90 - sub_i_min)
+  ## Case 1: Neither team has subs
+  if (teams_both_subs == 0){
+    team1_subs_count <- 0
+    team2_subs_count <- 0
+    team1_subs_total_min <- 0
+    team2_subs_total_min <- 0
+  }
+  
+  ## Case 2: One team has subs
+  else if (teams_both_subs == 1){
+    ## Determine which team has subs
+    team_subs_check <- substr(match, substitutes_headers[[1]][1,2], str_length(match))
+    team_subs_check_players <- str_locate_all(team_subs_check, pattern = "\n\n[0-9]{1,2}\t")
+    
+    ## Case 2a: Team 1 has subs
+    if (nrow(team_subs_check_players[[1]]) >= 12){
+      team1_subs_text_start_n <- substitutes_headers[[1]][1,2] - 1
+      team1_subs_text_alt_end_n <- str_length(match)
+      team1_subs_text <- substr(match, team1_subs_text_start_n, team1_subs_text_alt_end_n)
+      team1_subs_text_nns <- str_locate_all(team1_subs_text, pattern = "\n\n")
+      team1_subs_available <- nrow(team1_subs_text_nns[[1]]) - 12
+      team1_subs_text <- substr(team1_subs_text, 1, team1_subs_text_nns[[1]][(team1_subs_available + 1), 1] + 1)
+      
+      team1_subs_count <- 0
+      ## Count how many sub minutes were played in regulation
+      team1_subs_total_min <- 0
+      for (i in 1:team1_subs_available){
+        sub_i_start_n <- team1_subs_text_nns[[1]][i,2] + 1
+        sub_i_end_n <- team1_subs_text_nns[[1]][(i + 1), 2]
+        sub_i <- substr(team1_subs_text, sub_i_start_n, sub_i_end_n)
+        sub_i_min_check <- str_locate_all(sub_i, pattern = "\t[0-9]{1,3}'\n\n")
+        ### Case 1: Sub made appearance
+        if (nrow(sub_i_min_check[[1]]) > 0){
+          sub_i_min_start_n <- sub_i_min_check[[1]][1,1] + 1
+          sub_i_min_end_n <- sub_i_min_check[[1]][1,2] - 3
+          sub_i_min <- as.integer(substr(sub_i, sub_i_min_start_n, sub_i_min_end_n))
+          ### Case 1: Sub made appearance in regulation
+          if (sub_i_min <= 90){
+            team1_subs_count <- team1_subs_count + 1
+            team1_subs_total_min <- team1_subs_total_min + (90 - sub_i_min)
+          }
+        }
       }
+      
+      team2_subs_count <- 0
+      team2_subs_total_min <- 0
+    }
+    
+    ## Case 2b: Team 2 has subs
+    else {
+      team2_subs_text_start_n <- substitutes_headers[[1]][1,2] - 1
+      team2_subs_text_end_n <- str_length(match)
+      team2_subs_text <- paste(substr(match, team2_subs_text_start_n, team2_subs_text_end_n), "\n\n", sep = "")
+      team2_subs_text_nns <- str_locate_all(team2_subs_text, pattern = "\n\n")
+      team2_subs_available <- nrow(team2_subs_text_nns[[1]]) - 1
+      
+      team2_subs_count <- 0
+      ## Count how many sub minutes were played in regulation
+      team2_subs_total_min <- 0
+      for (i in 1:team2_subs_available){
+        sub_i_start_n <- team2_subs_text_nns[[1]][i,2] + 1
+        sub_i_end_n <- team2_subs_text_nns[[1]][(i + 1), 2]
+        sub_i <- substr(team2_subs_text, sub_i_start_n, sub_i_end_n)
+        sub_i_min_check <- str_locate_all(sub_i, pattern = "\t[0-9]{1,3}'\n\n")
+        ### Case 1: Sub made appearance
+        if (nrow(sub_i_min_check[[1]]) > 0){
+          sub_i_min_start_n <- sub_i_min_check[[1]][1,1] + 1
+          sub_i_min_end_n <- sub_i_min_check[[1]][1,2] - 3
+          sub_i_min <- as.integer(substr(sub_i, sub_i_min_start_n, sub_i_min_end_n))
+          ### Case 1: Sub made appearance in regulation
+          if (sub_i_min <= 90){
+            team2_subs_count <- team2_subs_count + 1
+            team2_subs_total_min <- team2_subs_total_min + (90 - sub_i_min)
+          }
+        }
+      }
+      
+      team1_subs_count <- 0
+      team1_subs_total_min <- 0
     }
   }
   
-  ## Count how many subs each team used in regulation
-  team2_subs_count <- 0
-  ## Count how many sub minutes were played in regulation
-  team2_subs_total_min <- 0
-  for (i in 1:team2_subs_available){
-    sub_i_start_n <- team2_subs_text_nns[[1]][i,2] + 1
-    sub_i_end_n <- team2_subs_text_nns[[1]][(i + 1), 2]
-    sub_i <- substr(team2_subs_text, sub_i_start_n, sub_i_end_n)
-    sub_i_min_check <- str_locate_all(sub_i, pattern = "\t[0-9]{1,3}'\n\n")
-    ### Case 1: Sub made appearance
-    if (nrow(sub_i_min_check[[1]]) > 0){
-      sub_i_min_start_n <- sub_i_min_check[[1]][1,1] + 1
-      sub_i_min_end_n <- sub_i_min_check[[1]][1,2] - 3
-      sub_i_min <- as.integer(substr(sub_i, sub_i_min_start_n, sub_i_min_end_n))
-      ### Case 1: Sub made appearance in regulation
-      if (sub_i_min <= 90){
-        team2_subs_count <- team2_subs_count + 1
-        team2_subs_total_min <- team2_subs_total_min + (90 - sub_i_min)
+  ## Case 3: Both teams have subs
+  else {
+    team1_subs_text_start_n <- substitutes_headers[[1]][1,2] - 1
+    team1_subs_text_end_n <- substitutes_headers[[1]][2,1] + 1
+    team1_subs_text <- substr(match, team1_subs_text_start_n, team1_subs_text_end_n)
+    team1_subs_text_nns <- str_locate_all(team1_subs_text, pattern = "\n\n")
+    team1_subs_available <- nrow(team1_subs_text_nns[[1]]) - 12
+    team1_subs_text <- substr(team1_subs_text, 1, team1_subs_text_nns[[1]][(team1_subs_available + 1), 1] + 1)
+    
+    team2_subs_text_start_n <- substitutes_headers[[1]][2,2] - 1
+    team2_subs_text_end_n <- str_length(match)
+    team2_subs_text <- paste(substr(match, team2_subs_text_start_n, team2_subs_text_end_n), "\n\n", sep = "")
+    team2_subs_text_nns <- str_locate_all(team2_subs_text, pattern = "\n\n")
+    team2_subs_available <- nrow(team2_subs_text_nns[[1]]) - 1
+    
+    ## Count how many subs each team used in regulation
+    team1_subs_count <- 0
+    ## Count how many sub minutes were played in regulation
+    team1_subs_total_min <- 0
+    for (i in 1:team1_subs_available){
+      sub_i_start_n <- team1_subs_text_nns[[1]][i,2] + 1
+      sub_i_end_n <- team1_subs_text_nns[[1]][(i + 1), 2]
+      sub_i <- substr(team1_subs_text, sub_i_start_n, sub_i_end_n)
+      sub_i_min_check <- str_locate_all(sub_i, pattern = "\t[0-9]{1,3}'\n\n")
+      ### Case 1: Sub made appearance
+      if (nrow(sub_i_min_check[[1]]) > 0){
+        sub_i_min_start_n <- sub_i_min_check[[1]][1,1] + 1
+        sub_i_min_end_n <- sub_i_min_check[[1]][1,2] - 3
+        sub_i_min <- as.integer(substr(sub_i, sub_i_min_start_n, sub_i_min_end_n))
+        ### Case 1: Sub made appearance in regulation
+        if (sub_i_min <= 90){
+          team1_subs_count <- team1_subs_count + 1
+          team1_subs_total_min <- team1_subs_total_min + (90 - sub_i_min)
+        }
+      }
+    }
+    
+    ## Count how many subs each team used in regulation
+    team2_subs_count <- 0
+    ## Count how many sub minutes were played in regulation
+    team2_subs_total_min <- 0
+    for (i in 1:team2_subs_available){
+      sub_i_start_n <- team2_subs_text_nns[[1]][i,2] + 1
+      sub_i_end_n <- team2_subs_text_nns[[1]][(i + 1), 2]
+      sub_i <- substr(team2_subs_text, sub_i_start_n, sub_i_end_n)
+      sub_i_min_check <- str_locate_all(sub_i, pattern = "\t[0-9]{1,3}'\n\n")
+      ### Case 1: Sub made appearance
+      if (nrow(sub_i_min_check[[1]]) > 0){
+        sub_i_min_start_n <- sub_i_min_check[[1]][1,1] + 1
+        sub_i_min_end_n <- sub_i_min_check[[1]][1,2] - 3
+        sub_i_min <- as.integer(substr(sub_i, sub_i_min_start_n, sub_i_min_end_n))
+        ### Case 1: Sub made appearance in regulation
+        if (sub_i_min <= 90){
+          team2_subs_count <- team2_subs_count + 1
+          team2_subs_total_min <- team2_subs_total_min + (90 - sub_i_min)
+        }
       }
     }
   }
