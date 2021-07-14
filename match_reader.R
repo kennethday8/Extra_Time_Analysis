@@ -3,6 +3,11 @@ match_reader <- function(match, team2, score){
   match_start <- str_locate_all(match, pattern = paste(team2, "\n\n", score, sep = ""))
   match_start_n <- match_start[[1]][1,1]
   match_end <- str_locate_all(match, pattern = "\n\nManager: ")
+  
+  ## Modify match_end if managers not listed
+  if (nrow(match_end[[1]]) == 0){
+    match_end <- str_locate_all(match, pattern = "\n\n[^%]{1,100} \\([^%]{1,50} / [^%]{1,50}\\)")
+  }
   match_end_n <- match_end[[1]][1,1]
   match <- substr(match, match_start_n, match_end_n)
   
