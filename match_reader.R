@@ -39,6 +39,10 @@ match_reader <- function(match, team2, score){
           last_goal_number <- i
         }
       }
+      
+      if (last_goal_number == 0){
+        last_goal_team <- 0
+      } else {
       ## Determine which team scored last in regulation
       goal_score_starts <- str_locate_all(goal_list, pattern = "[0-9]{1,2} : ")
       goal_score_seps <- str_locate_all(goal_list, pattern = " : ")
@@ -79,7 +83,8 @@ match_reader <- function(match, team2, score){
         last_goal_team <- 1
       }
     }
-  } 
+  }
+  }
   ## Case 2: Match does not go to a penalty shoot-out (PSO)
   else {
     ## Calculate number of goals scored in match
