@@ -54,6 +54,8 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   ot <- ot[order(ot$Date),]
   rownames(ot) <- NULL
   
+  ot_ets <- matrix(0, nrow = match_count, ncol = 2)
+  
   ## Insert columns that show stats for team1's previous matches
   
   ## Add columns to be filled in
@@ -65,11 +67,7 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   ot$Team1_sub_mins_previous <- 0
   ot$Team1_subs_previous_3 <- 0
   ot$Team1_sub_mins_previous_3 <- 0
-  
-  print(colnames(ot))
-  
-  ot_ets <- matrix(0, nrow = match_count, ncol = 1)
-  
+
   for (i in 2:match_count){
     
     ## Create table of previous matches and sort by date
@@ -77,6 +75,8 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
     columns_use2 <- c(4,8,18,19,13)
     matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,3] & Comp == ot[i,7])[,columns_use1]
     matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,3] & Comp == ot[i,7])[,columns_use2]
+    colnames(matches_i_t1) <- c("Date", "Score", "Subs", "Sub_Mins", "Extra_Time")
+    colnames(matches_i_t2) <- c("Date", "Score", "Subs", "Sub_Mins", "Extra_Time")
     matches_i <- rbind(matches_i_t1, matches_i_t2)
     matches_i <- matches_i[order(matches_i$Date),]
     
@@ -85,8 +85,8 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
     ot[i,25] <- previous_matches_i
     
     ## Compute subs and sub mins per game
-    subs_total <- sum(matches_i$t1_subs)
-    sub_mins_total <- sum(matches_i$t1_sub_mins)
+    subs_total <- sum(matches_i$Subs)
+    sub_mins_total <- sum(matches_i$Sub_Mins)
     if (previous_matches_i != 0){
       ot[i,26] <- subs_total / previous_matches_i
       ot[i,27] <- sub_mins_total / previous_matches_i
@@ -112,7 +112,7 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
     }
     
     ## Determine if last match went to extra time
-    matches_et_i <- matches[,5]
+    matches_et_i <- matches_i[,5]
     ## Case 1: not team's first match of the competition
     if (previous_matches_i != 0){
       ot_ets[i,1] <- matches_et_i[previous_matches_i]
@@ -135,9 +135,12 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   for (i in 2:match_count){
     
     ## Create table of previous matches and sort by date
-    columns_use <- c(4,8,18,19)
-    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,1] & Comp == ot[i,7])[,columns_use]
-    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,1] & Comp == ot[i,7])[,columns_use]
+    columns_use1 <- c(4,8,16,17,13)
+    columns_use2 <- c(4,8,18,19,13)
+    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,1] & Comp == ot[i,7])[,columns_use1]
+    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,1] & Comp == ot[i,7])[,columns_use2]
+    colnames(matches_i_t1) <- c("Date", "Score", "Subs", "Sub_Mins", "Extra_Time")
+    colnames(matches_i_t2) <- c("Date", "Score", "Subs", "Sub_Mins", "Extra_Time")
     matches_i <- rbind(matches_i_t1, matches_i_t2)
     matches_i <- matches_i[order(matches_i$Date),]
     
@@ -146,8 +149,8 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
     ot[i,33] <- previous_matches_i
     
     ## Compute subs and sub mins per game
-    subs_total <- sum(matches_i$t2_subs)
-    sub_mins_total <- sum(matches_i$t2_sub_mins)
+    subs_total <- sum(matches_i$Subs)
+    sub_mins_total <- sum(matches_i$Sub_Mins)
     if (previous_matches_i != 0){
       ot[i,34] <- subs_total / previous_matches_i
       ot[i,35] <- sub_mins_total / previous_matches_i
@@ -171,6 +174,13 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
     if (previous_matches_i != 0){
       ot[i,32] <- matches_dates_i[previous_matches_i]
     }
+    
+    ## Determine if last match went to extra time
+    matches_et_i <- matches_i[,5]
+    ## Case 1: not team's first match of the competition
+    if (previous_matches_i != 0){
+      ot_ets[i,2] <- matches_et_i[previous_matches_i]
+    }
   }
   ot$Team2_last_date <- as_date(ot$Team2_last_date)
   
@@ -178,7 +188,173 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   columns_remove <- c(1,2,3,9,10)
   ot <- ot[,-columns_remove]
   
+  ## Add in columns based on winner and loser
+  ot$winner_last_goal <- 0
+  ot$loser_last_goal <- 0
   
+  ot$winner_subs <- 0
+  ot$loser_subs <- 0
+  
+  ot$winner_sub_mins <- 0
+  ot$loser_sub_mins <- 0
+  
+  ot$winner_rank <- 0
+  ot$loser_rank <- 0
+  
+  ot$winner_pts_norm <- 0
+  ot$loser_pts_norm <- 0
+  
+  ot$winner_last_date <- 0
+  ot$loser_last_date <- 0
+  
+  ot$winner_subs_per_game <- 0
+  ot$loser_subs_per_game <- 0
+  
+  ot$winner_sub_min_per_game <- 0
+  ot$loser_sub_min_per_game <- 0
+  
+  ot$winner_subs_previous <- 0
+  ot$loser_subs_previous <- 0
+  
+  ot$winner_sub_mins_previous <- 0
+  ot$loser_sub_mins_previous <- 0
+  
+  ot$winner_subs_previous_3 <- 0
+  ot$loser_subs_previous_3 <- 0
+  
+  ot$winner_sub_mins_previous_3 <- 0
+  ot$loser_sub_mins_previous_3 <- 0
+  
+  ot$winner_previous_et <- 0
+  ot$loser_previous_et <- 0
+  
+  for (i in 1:match_count){
+  
+    ## Case 1: Team 1 wins
+    if(ot[i,9] == 1){
+      
+      ## Check if Team 1 scored last
+      if(ot[i,10] == 1){
+        ot[i,35] <- 1
+        ot[i,36] <- 0
+      }
+      else if (ot[i,10] == 2){
+        ot[i,35] <- 0
+        ot[i,36] <- 1
+      }
+      
+      ## subs
+      ot[i,37] <- ot[i,11]
+      ot[i,38] <- ot[i,13]
+      
+      ## sub_mins
+      ot[i,39] <- ot[i,12]
+      ot[i,40] <- ot[i,14]
+      
+      ## rank
+      ot[i,41] <- ot[i,15]
+      ot[i,42] <- ot[i,17]
+      
+      ## pts_norm
+      ot[i,43] <- ot[i,16]
+      ot[i,44] <- ot[i,18]
+      
+      ## last date
+      ot[i,45] <- ot[i,19]
+      ot[i,46] <- ot[i,27]
+      
+      ## subs per game
+      ot[i,47] <- ot[i,21]
+      ot[i,48] <- ot[i,29]
+      
+      ## sub mins per game
+      ot[i,49] <- ot[i,22]
+      ot[i,50] <- ot[i,30]
+      
+      ## subs previous
+      ot[i,51] <- ot[i,23]
+      ot[i,52] <- ot[i,31]
+      
+      ## sub mins previous
+      ot[i,53] <- ot[i,24]
+      ot[i,54] <- ot[i,32]
+      
+      ## subs previous 3
+      ot[i,55] <- ot[i,25]
+      ot[i,56] <- ot[i,33]
+      
+      ## sub mins previous 3
+      ot[i,57] <- ot[i,26]
+      ot[i,58] <- ot[i,34]
+      
+      ## previous extra time
+      ot[i,59] <- ot_ets[i,1]
+      ot[i,60] <- ot_ets[i,2]
+    }
+    
+    ## Case 2: Team 2 wins
+    else if (ot[i,9] == 2) {
+      
+      ## Check if Team 2 scored last
+      if(ot[i,10] == 2){
+        ot[i,35] <- 1
+        ot[i,36] <- 0
+      }
+      else if (ot[i,10] == 1){
+        ot[i,35] <- 0
+        ot[i,36] <- 1
+      }
+      
+      ## subs
+      ot[i,37] <- ot[i,13]
+      ot[i,38] <- ot[i,11]
+      
+      ## sub_mins
+      ot[i,39] <- ot[i,14]
+      ot[i,40] <- ot[i,12]
+      
+      ## rank
+      ot[i,41] <- ot[i,17]
+      ot[i,42] <- ot[i,15]
+      
+      ## pts_norm
+      ot[i,43] <- ot[i,18]
+      ot[i,44] <- ot[i,16]
+      
+      ## last date
+      ot[i,45] <- ot[i,27]
+      ot[i,46] <- ot[i,19]
+      
+      ## subs per game
+      ot[i,47] <- ot[i,29]
+      ot[i,48] <- ot[i,21]
+      
+      ## sub mins per game
+      ot[i,49] <- ot[i,30]
+      ot[i,50] <- ot[i,22]
+      
+      ## subs previous
+      ot[i,51] <- ot[i,31]
+      ot[i,52] <- ot[i,23]
+      
+      ## sub mins previous
+      ot[i,53] <- ot[i,32]
+      ot[i,54] <- ot[i,24]
+      
+      ## subs previous 3
+      ot[i,55] <- ot[i,33]
+      ot[i,56] <- ot[i,25]
+      
+      ## sub mins previous 3
+      ot[i,57] <- ot[i,34]
+      ot[i,58] <- ot[i,26]
+      
+      ## previous extra time
+      ot[i,59] <- ot_ets[i,2]
+      ot[i,60] <- ot_ets[i,1]
+    }
+  
+  }
   
   time_end <- Sys.time()
   print((time_end - time_start))
