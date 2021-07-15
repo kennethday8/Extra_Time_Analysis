@@ -66,12 +66,17 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   ot$Team1_subs_previous_3 <- 0
   ot$Team1_sub_mins_previous_3 <- 0
   
+  print(colnames(ot))
+  
+  ot_ets <- matrix(0, nrow = match_count, ncol = 1)
+  
   for (i in 2:match_count){
     
     ## Create table of previous matches and sort by date
-    columns_use <- c(4,8,16,17)
-    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,3] & Comp == ot[i,7])[,columns_use]
-    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,3] & Comp == ot[i,7])[,columns_use]
+    columns_use1 <- c(4,8,16,17,13)
+    columns_use2 <- c(4,8,18,19,13)
+    matches_i_t1 <- filter(ot[1:(i-1),], Team1_ID == ot[i,3] & Comp == ot[i,7])[,columns_use1]
+    matches_i_t2 <- filter(ot[1:(i-1),], Team2_ID == ot[i,3] & Comp == ot[i,7])[,columns_use2]
     matches_i <- rbind(matches_i_t1, matches_i_t2)
     matches_i <- matches_i[order(matches_i$Date),]
     
@@ -104,6 +109,13 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
     ## Case 1: not team's first match of the competition
     if (previous_matches_i != 0){
       ot[i,24] <- matches_dates_i[previous_matches_i]
+    }
+    
+    ## Determine if last match went to extra time
+    matches_et_i <- matches[,5]
+    ## Case 1: not team's first match of the competition
+    if (previous_matches_i != 0){
+      ot_ets[i,1] <- matches_et_i[previous_matches_i]
     }
   }
   ot$Team1_last_date <- as_date(ot$Team1_last_date)
@@ -165,6 +177,8 @@ output_table <- function(matches, rankings, country_ids, comp_rankings){
   ## Clean up table by removing unnecessary columns
   columns_remove <- c(1,2,3,9,10)
   ot <- ot[,-columns_remove]
+  
+  
   
   time_end <- Sys.time()
   print((time_end - time_start))
