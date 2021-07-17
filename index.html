@@ -171,23 +171,42 @@ pre code {
 </div>
 
 
-<div id="r-markdown" class="section level2">
-<h2>R Markdown</h2>
-<p>This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
-<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
-<pre class="r"><code>summary(cars)</code></pre>
-<pre><code>##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00</code></pre>
+<div id="introduction" class="section level3">
+<h3><strong>Introduction</strong></h3>
+<p>With both the European Championships and the Copa America football tournaments coming to an end recently, I wanted to take a look at how different factors related to rest and recovery relate to a nation’s success during the knockout stages.</p>
+<p>For this analysis, I looked at all elimination knockout matches since 1993 for the World Cup, European Championship, and Copa America. I choose these three competitions because they are the three of the biggest (and highest level) national team competitions contested. Why since 1993? The first official FIFA World Rankings were released in December 1992, and I wanted to include a rankings difference when looking at individual matchups.</p>
+<hr />
 </div>
-<div id="including-plots" class="section level2">
-<h2>Including Plots</h2>
-<p>You can also embed plots, for example:</p>
-<p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
+<div id="data-collection-and-integration" class="section level3">
+<h3><strong>Data Collection and Integration</strong></h3>
+<div id="match-data" class="section level5">
+<h5><strong>Match Data</strong></h5>
+<p>I used webscraping to get individual match data and statistics from <a href="www.worldfootball.net">worldfootball.net</a>. For each match, I isolated the match report text, and I used it to isolate several important statistics/pieces of information. These included:</p>
+<ul>
+<li>Match date<br />
+</li>
+<li>The two nations involved<br />
+</li>
+<li>Winning nation<br />
+</li>
+<li>Score<br />
+</li>
+<li>Match duration and resolution (90 minutes vs. extra time and/or penalty hootout)<br />
+</li>
+<li>Number of subs used by both teams in regulation<br />
+</li>
+<li>Number of minutes played by both teams’ subs in regulation<br />
+</li>
+<li>Which team scored the last goal in regulation</li>
+</ul>
+<p>In all, individual match data was collected for 994 matches (note: 3rd place matches were not included). The following table gives a breakdown of the distribution of matches between the three tournaments:</p>
+<pre class="r"><code>load(file = &quot;data.RData&quot;)
+match_quantity_table</code></pre>
+<pre><code>##               Copa America Euros World Cup
+## Editions                12     7         7
+## Total Matches          308   257       429
+## KO Matches              84    65       105</code></pre>
+</div>
 </div>
 
 
