@@ -215,7 +215,27 @@ match_quantity_table</code></pre>
 <li>A country name/id key was created that accounted for any differences in country names between the match data and the rankings data. (For example, it is listed as “South Korea” in the match data and “Korea Republic” in the rankings data)</li>
 <li>For each match, both teams’ rank and rank-points were taken from the last edition of the rankings released before the first match of the tournament.</li>
 </ol>
+<hr />
 </div>
+</div>
+<div id="data-manipulation" class="section level3">
+<h3><strong>Data Manipulation</strong></h3>
+<p>With the match and ranking data collected and integrated, the next step was to manipulate the data to create the necessary variables. These included the following variables for both teams for all 994 matches:</p>
+<ul>
+<li>Date of last match played at the tournament</li>
+<li>Normalized rank-points (necessary due to the large discrepancy in points awarded in different editions of the rankings)
+<ul>
+<li>Calculated as <span class="math inline">\(1000 {\times} \frac{\mbox{rank points}}{\mbox{total rank points}}\)</span></li>
+</ul></li>
+<li>Subs used in the previous match</li>
+<li>Substitute minutes played in the previous match</li>
+<li>Subs used in the previous 3 matches</li>
+<li>Substitute minutes played in previous 3 matches</li>
+<li>Average subs used in all previous matches</li>
+<li>Average substitute minutes played in all previous matches</li>
+<li>Duration of the previous match (90 minutes vs. 120 minutes)</li>
+</ul>
+<p>Note: For substitute statistics, I decided that only subs used in regulation were used. This is because the additional burden of extra time was included in the previous match duration variable. Also, if a team uses a fourth sub in extra time, having used four subs instead of three would seem to imply the team is more rested for their next match, but it would actually be the opposite because they played thirty extra minutes.</p>
 </div>
 
 
