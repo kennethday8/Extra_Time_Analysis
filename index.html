@@ -191,7 +191,7 @@ pre code {
 </li>
 <li>Score<br />
 </li>
-<li>Match duration and resolution (90 minutes vs. extra time and/or penalty hootout)<br />
+<li>Match duration and resolution (90 minutes vs. extra time and/or penalty shootout)<br />
 </li>
 <li>Number of subs used by both teams in regulation<br />
 </li>
@@ -206,6 +206,15 @@ match_quantity_table</code></pre>
 ## Editions                12     7         7
 ## Total Matches          308   257       429
 ## KO Matches              84    65       105</code></pre>
+</div>
+<div id="fifa-rankings" class="section level5">
+<h5><strong>FIFA Rankings</strong></h5>
+<p>The FIFA World Ranking is a worldwide ranking of all recognized national teams from the six continental confederations (the latest May 2021 rankings had 210 nations). The methodology of the rankings have changed over the years, but the purpose has always been to generate a points value for each team that allows them to be ranked from best to worst (you can learn more about the current formula FIFA uses <a href="https://digitalhub.fifa.com/m/f99da4f73212220/original/edbm045h0udbwkqew35a-pdf.pdf">here</a>). From the first FIFA rankings in December 1992 through May 2021, there have been 312 editions of the rankings, and I retrieved a comprehensive set of all of these rankings from <a href="https://www.kaggle.com/cashncarry/fifaworldranking">here</a>.</p>
+<p>In order to integrate these rankings and point values with the match data, the following steps were taken:</p>
+<ol style="list-style-type: decimal">
+<li>A country name/id key was created that accounted for any differences in country names between the match data and the rankings data. (For example, it is listed as “South Korea” in the match data and “Korea Republic” in the rankings data)</li>
+<li>For each match, both teams’ rank and rank-points were taken from the last edition of the rankings released before the first match of the tournament.</li>
+</ol>
 </div>
 </div>
 
